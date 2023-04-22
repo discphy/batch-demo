@@ -1,5 +1,6 @@
 package com.discphy.batch.demo.job;
 
+import com.discphy.batch.demo.tasklet.SimpleJobTasklet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -20,23 +21,19 @@ public class SimpleJobConfiguration {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
+    private final SimpleJobTasklet tasklet;
+
     @Bean
     public Job simpleJob() {
         return jobBuilderFactory.get("simpleJob")
-                .start(simpleStep1(null))
+                .start(simpleStep1())
                 .next(simpleStep2(null))
                 .build();
     }
 
-    @Bean
-    @JobScope
-    public Step simpleStep1(@Value("#{jobParameters[requestDate]}") String requestDate) {
+    public Step simpleStep1() {
         return stepBuilderFactory.get("simpleStep1")
-                .tasklet(((contribution, chunkContext) -> {
-                    log.info(">>>>> This is Step1");
-                    log.info(">>>>> requestDate = {}", requestDate);
-                    return RepeatStatus.FINISHED;
-                }))
+                .tasklet(tasklet)
                 .build();
     }
 
